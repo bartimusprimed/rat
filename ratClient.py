@@ -2,7 +2,7 @@
 from xmlrpc import client
 import dill
 
-server_ip = '192.168.1.163'
+server_ip = '127.0.0.1'
 server_port = 4000
 
 
